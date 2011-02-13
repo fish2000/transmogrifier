@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import commands
-import datetime
 import glob
 import logging
 import os
 import sys
 import types
+
+# argparse was added in Python 3.2 - for earlier Pythons just install it manually (easy_install argparse)
 import argparse
 
 import anytranscoder

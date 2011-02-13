@@ -16,7 +16,7 @@ logger = logging.getLogger()
 
 ########################################################################
 
-class InputException(Exception):
+class ArgumentException(Exception):
 	pass
 
 def cleanup(s):
@@ -75,37 +75,7 @@ class Transmogrifier(object):
 
 	def parse(self, args):
 
-		theOptions = self.argparser.parse_args(args = args)
-
-		if theOptions.args == list('transmogrifier'):
-			theOptions.args = []
-
-		if not theOptions.input and theOptions.args:
-			theFile = theOptions.args.pop(0)
-			if not os.path.exists(theFile):
-				raise InputException('No file at path')
-			theOptions.input = file(theFile)
-
-		if not theOptions.output and theOptions.args:
-			theFile = theOptions.args.pop(0)
-			theOptions.output = file(theFile, 'w')
-
-		if not theOptions.input:
-			theOptions.input = sys.stdin
-	#
-		if not theOptions.output:
-			theOptions.output = sys.stdout
-
-		if not theOptions.input_type:
-			theOptions.input_type = os.path.splitext(theOptions.input.name)[1][1:]
-
-		if not theOptions.output_type:
-			theOptions.output_type = os.path.splitext(theOptions.output.name)[1][1:]
-
-		self.options = theOptions
-
-	def main(self, args):
-		self.parse(args)
+		self.options = self.argparser.parse_args(args = args)
 
 		for theHandler in logger.handlers:
 			logger.removeHandler(theHandler)
@@ -116,28 +86,59 @@ class Transmogrifier(object):
 		theHandler = logging.StreamHandler(self.options.logstream)
 		logger.addHandler(theHandler)
 
-		####################################################################
+		# TODO this is to get around a strange argparse issue if we have no args.
+# 		if self.options.args == list('transmogrifier'):
+# 			self.options.args = []
+
+		if not self.options.input and len(self.options.args) > 1:
+			theFile = self.options.args.pop(1)
+			if not os.path.exists(theFile):
+				raise ArgumentException('No file at path')
+			self.options.input = file(theFile)
+
+		if not self.options.output and len(self.options.args) > 1:
+			theFile = self.options.args.pop(1)
+			self.options.output = file(theFile, 'w')
+
+		if not self.options.input:
+			self.options.input = sys.stdin
+	#
+		if not self.options.output:
+			self.options.output = sys.stdout
+
+		if not self.options.input_type:
+			theExtension = os.path.splitext(self.options.input.name)[1]
+			self.options.input_type = theExtension[1:]
+
+
+		if not self.options.output_type:
+			self.options.output_type = os.path.splitext(self.options.output.name)[1][1:]
+
+		if not self.options.input_type or not self.options.input:
+			raise ArgumentException('No input')
+
+		if not self.options.output_type:
+			self.options.output_type = self.options.input_type
+
+	def main(self, args):
 
 		try:
-			if not self.options.input_type or not self.options.input:
-				raise InputException('No input')
-
-			theDecoder = anytranscoder.transcoder(self.options.input_type)
-			o = theDecoder.load(self.options.input)
-			o = purify(o)
-
-			theEncoder = anytranscoder.transcoder(self.options.output_type)
-
-			theEncoder.dump(o, self.options.output, indent = self.options.pretty)
-
-
-		except InputException, e:
-			logger.error('Input Exception')
+			self.parse(args)
+		except ArgumentException, e:
+			logger.error('Argument Exception: %s' % e)
 			self.argparser.print_help();
 			sys.exit(1)
 		except Exception, e:
 			logger.debug('Options: %s' % self.options)
 			raise
+
+		theDecoder = anytranscoder.transcoder(self.options.input_type)
+		o = theDecoder.load(self.options.input)
+		o = purify(o)
+
+		theEncoder = anytranscoder.transcoder(self.options.output_type)
+		theEncoder.dump(o, self.options.output, indent = self.options.pretty)
+
 
 		####################################################################
 
@@ -145,13 +146,13 @@ def main(args):
 	t = Transmogrifier()
 	t.main(args)
 
-if __name__ == '__main__':
-	os.chdir(os.path.expanduser('~/Desktop/transmogrifier/Test Data'))
-# 	main('transmogrifier')
- 	main('transmogrifier --pretty -i Test.json -o Test2.yaml'.split(' '))
-# 	main('transmogrifier'.split(' '))
-# 	main('transmogrifier -i Test.plist --output-type json'.split(' '))
-#  	main('transmogrifier Test.yaml Test.json'.split(' '))
-#  	main('transmogrifier --input-type=json Test.json Test.yaml'.split(' '))
-#  	main('transmogrifier --input-type=yaml Test.json Test.yaml'.split(' '))
-# 	main('transmogrifier Test.json Test.yaml'.split(' '))
+# if __name__ == '__main__':
+# 	os.chdir(os.path.expanduser('~/Desktop/transmogrifier/Test Data'))
+# # 	main('transmogrifier')
+#  	main('transmogrifier --pretty -i Test.json -o Test2.yaml'.split(' '))
+# # 	main('transmogrifier'.split(' '))
+# # 	main('transmogrifier -i Test.plist --output-type json'.split(' '))
+# #  	main('transmogrifier Test.yaml Test.json'.split(' '))
+# #  	main('transmogrifier --input-type=json Test.json Test.yaml'.split(' '))
+# #  	main('transmogrifier --input-type=yaml Test.json Test.yaml'.split(' '))
+# # 	main('transmogrifier Test.json Test.yaml'.split(' '))

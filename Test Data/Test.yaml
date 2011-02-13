@@ -1,0 +1,13 @@
+Family:
+  classname: CFamily
+  properties:
+  - {name: name, type: string}
+  - {name: members, type: array, valueType: Person}
+  - {keyType: string, name: dict, type: dict, valueType: string}
+  typename: Family
+Person:
+  classname: CPerson
+  properties:
+  - {name: name, type: string}
+  - {name: age, type: integer}
+  typename: Person

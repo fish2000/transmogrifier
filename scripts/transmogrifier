@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import transmogrifier
+import sys
+
+transmogrifier.main(sys.argv)

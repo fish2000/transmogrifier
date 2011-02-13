@@ -21,7 +21,7 @@ setup(
 		],
 	description = 'Python command line tool to convert data between different formats',
 	license = 'BSD License',
-	long_description = file('README.txt').read(),
+	long_description = file('README.markdown').read(),
 	url = 'http://github.com/schwa/transmogrifier',
 	)
 

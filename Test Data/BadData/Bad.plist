@@ -1,0 +1,62 @@
+x<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Family</key>
+	<dict>
+		<key>classname</key>
+		<string>CFamily</string>
+		<key>properties</key>
+		<array>
+			<dict>
+				<key>name</key>
+				<string>name</string>
+				<key>type</key>
+				<string>string</string>
+			</dict>
+			<dict>
+				<key>name</key>
+				<string>members</string>
+				<key>type</key>
+				<string>array</string>
+				<key>valueType</key>
+				<string>Person</string>
+			</dict>
+			<dict>
+				<key>keyType</key>
+				<string>string</string>
+				<key>name</key>
+				<string>dict</string>
+				<key>type</key>
+				<string>dict</string>
+				<key>valueType</key>
+				<string>string</string>
+			</dict>
+		</array>
+		<key>typename</key>
+		<string>Family</string>
+	</dict>
+	<key>Person</key>
+	<dict>
+		<key>classname</key>
+		<string>CPerson</string>
+		<key>properties</key>
+		<array>
+			<dict>
+				<key>name</key>
+				<string>name</string>
+				<key>type</key>
+				<string>string</string>
+			</dict>
+			<dict>
+				<key>name</key>
+				<string>age</string>
+				<key>type</key>
+				<string>integer</string>
+			</dict>
+		</array>
+		<key>typename</key>
+		<string>Person</string>
+	</dict>
+</dict>
+</plist>

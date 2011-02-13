@@ -69,9 +69,9 @@ class plist(object):
 		return plistlib.readPlistFromBytes(s)
 
 	@classmethod
-	def dump(cls, obj, fp):
+	def dump(cls, obj, fp, indent = False):
 		return plistlib.writePlist(obj, fp)
 
 	@classmethod
-	def dumps(cls, obj, fp):
+	def dumps(cls, obj, fp, indent = False):
 		return plistlib.writePlistToBytes(obj, fp)

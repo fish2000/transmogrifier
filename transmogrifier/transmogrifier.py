@@ -4,21 +4,11 @@ import commands
 import datetime
 import glob
 import logging
-import optparse
 import os
-import pkg_resources
-import plistlib
-import pprint
-import re
-import subprocess
 import sys
-import tempfile
-import argparse
-import json
-import yaml
-
 import types
-import Foundation
+import argparse
+
 import anytranscoder
 
 logging.basicConfig(level = logging.DEBUG, format = '%(message)s', stream = sys.stderr)
@@ -156,7 +146,7 @@ def main(args):
 	t.main(args)
 
 if __name__ == '__main__':
-	os.chdir(os.path.expanduser('/Users/schwa/Desktop/transmogrifier/Test Data'))
+	os.chdir(os.path.expanduser('~/Desktop/transmogrifier/Test Data'))
 # 	main('transmogrifier')
  	main('transmogrifier --pretty -i Test.json -o Test2.yaml'.split(' '))
 # 	main('transmogrifier'.split(' '))

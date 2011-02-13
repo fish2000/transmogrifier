@@ -9,7 +9,7 @@ Goal
 ----
 Python command line tool to convert data between different formats
 
-Currently works JSON, yaml and (XML based) plists
+Currently works with JSON, yaml and (XML based) plists
 
 Install
 -------
@@ -26,11 +26,8 @@ With pip_::
 
   $ pip install transmogrifier
 
-
 .. _pip: http://pypi.python.org/pypi/pip
 .. _setuptools: http://peak.telecommunity.com/DevCenter/setuptools
-
-
 
 Usage
 -----

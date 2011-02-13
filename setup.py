@@ -7,12 +7,11 @@ setup(
 	name = 'transmogrifier',
 	version = '0.1.0dev',
 
-	install_requires = ['genshi >= 0.5'],
-	packages = find_packages(exclude = [ 'ez_setup', 'tests' ]),
-	package_data = { '': ['templates/*'] },
+	install_requires = ['argparse >= 1.1'],
+	packages = find_packages(exclude = [ 'ez_setup', 'Test Data' ]),
 	include_package_data = True,
 	scripts = ['scripts/transmogrifier'],
-	zip_safe = True,
+	zip_safe = False,
 	author = 'Jonathan Wight',
 	author_email = 'jwight@mac.com',
 	classifiers = [
@@ -20,10 +19,9 @@ setup(
 		'Intended Audience :: Developers',
 		'License :: OSI Approved :: BSD License',
 		],
-	description = 'Objective-C Code Generator',
+	description = 'Python command line tool to convert data between different formats',
 	license = 'BSD License',
 	long_description = file('README.txt').read(),
-#	platform = 'Mac OS X',
 	url = 'http://github.com/schwa/transmogrifier',
 	)
 

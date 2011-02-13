@@ -3,7 +3,7 @@
 __all__ = ['load', 'transcoder', 'json', 'yaml', 'plist', 'pyon']
 
 import plistlib
-import json
+import json as json
 import yaml
 
 import os
@@ -40,6 +40,24 @@ def load(fp, *args, **kwargs):
 
 # def loads(s):
 # 	pass
+
+# class json(object):
+# 	@classmethod
+# 	def load(cls, fp):
+# 		return jsonlib.load(fp)
+#
+# 	@classmethod
+# 	def loads(cls, s):
+# 		return jsonlib.loads(s)
+#
+# 	@classmethod
+# 	def dump(cls, obj, fp):
+# 		return jsonlib.dump(obj, fp)
+#
+# 	@classmethod
+# 	def dumps(cls, obj, fp):
+# 		return jsonlib.dumps(obj, fp)
+
 
 class plist(object):
 	@classmethod

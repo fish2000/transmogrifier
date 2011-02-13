@@ -1,1 +1,1 @@
-from transmogrifier import main, transmogrifier
+from transmogrifier import main, Transmogrifier

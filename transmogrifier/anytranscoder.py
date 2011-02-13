@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 
-__all__ = ['load', 'transcoder', 'json', 'yaml', 'plist', 'pyon']
+__all__ = ['load', 'transcoder', 'json', 'yaml', 'plist']
 
 import plistlib
-import json as json
-import yaml
+import json as jsonlib
+import yaml as yamllib
 
 import os
 
-# def dump(obj, fp):
-# 	pass
+class TranscoderLoadException(Exception):
+	pass
 
-# def dumps(obj):
-# 	pass
+class TranscoderDumpException(Exception):
+	pass
+
+########################################################################
 
 def transcoder(name):
 	if name == 'json':
@@ -24,6 +26,7 @@ def transcoder(name):
 	else:
 		return None
 
+########################################################################
 
 def load(fp, *args, **kwargs):
 	theExtension = os.path.splitext(fp.name)[1][1:]
@@ -38,40 +41,100 @@ def load(fp, *args, **kwargs):
 	else:
 		raise Exception('No transcoder module for %s' % fp.name)
 
+########################################################################
+
 # def loads(s):
 # 	pass
 
-# class json(object):
-# 	@classmethod
-# 	def load(cls, fp):
-# 		return jsonlib.load(fp)
-#
-# 	@classmethod
-# 	def loads(cls, s):
-# 		return jsonlib.loads(s)
-#
-# 	@classmethod
-# 	def dump(cls, obj, fp):
-# 		return jsonlib.dump(obj, fp)
-#
-# 	@classmethod
-# 	def dumps(cls, obj, fp):
-# 		return jsonlib.dumps(obj, fp)
+########################################################################
 
+class json(object):
+	@classmethod
+	def load(cls, fp, *args, **kwargs):
+		try:
+			return jsonlib.load(fp, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def loads(cls, s, *args, **kwargs):
+		try:
+			return jsonlib.loads(s, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def dump(cls, obj, fp, *args, **kwargs):
+		try:
+			return jsonlib.dump(obj, fp, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+	@classmethod
+	def dumps(cls, obj, fp):
+		try:
+			return jsonlib.dumps(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+########################################################################
+
+class yaml(object):
+	@classmethod
+	def load(cls, fp, *args, **kwargs):
+		try:
+			return yamllib.load(fp, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def loads(cls, s, *args, **kwargs):
+		try:
+			return yamllib.loads(s, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def dump(cls, obj, fp, *args, **kwargs):
+		try:
+			return yamllib.dump(obj, fp, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+	@classmethod
+	def dumps(cls, obj, fp, *args, **kwargs):
+		try:
+			return yamllib.dumps(obj, fp, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+########################################################################
 
 class plist(object):
 	@classmethod
 	def load(cls, fp):
-		return plistlib.readPlist(fp)
+		try:
+			return plistlib.readPlist(fp)
+		except Exception, e:
+			raise TranscoderLoadException(e)
 
 	@classmethod
 	def loads(cls, s):
-		return plistlib.readPlistFromBytes(s)
+		try:
+			return plistlib.readPlistFromBytes(s)
+		except Exception, e:
+			raise TranscoderLoadException(e)
 
 	@classmethod
 	def dump(cls, obj, fp, indent = False):
-		return plistlib.writePlist(obj, fp)
+		try:
+			return plistlib.writePlist(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)
 
 	@classmethod
 	def dumps(cls, obj, fp, indent = False):
-		return plistlib.writePlistToBytes(obj, fp)
+		try:
+			return plistlib.writePlistToBytes(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)

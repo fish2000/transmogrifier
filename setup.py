@@ -7,7 +7,7 @@ setup(
 	name = 'transmogrifier',
 	version = '0.1.0dev',
 
-	install_requires = ['argparse >= 1.1', 'pyyaml >= 3.0.9'],
+	install_requires = ['argparse >= 1.1', 'pyyaml >= 3.0.9', 'msgpack-python >= 0.1.9', 'bson >= 0.3.2'],
 	packages = find_packages(exclude = [ 'ez_setup', 'Test Data' ]),
 	include_package_data = True,
 	scripts = ['scripts/transmogrifier'],

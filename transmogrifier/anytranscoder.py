@@ -24,6 +24,11 @@ try:
 except:
 	pass
 
+try:
+	import bserializer as bserializerlib
+except:
+	pass
+
 
 ########################################################################
 
@@ -46,6 +51,8 @@ def transcoder(name):
 		return bson
 	elif name == 'msgpack':
 		return msgpack
+	elif name == 'bs':
+		return bserializer
 	else:
 		return None
 
@@ -61,6 +68,8 @@ def load(fp, *args, **kwargs):
 		return plist.load(fp, *args, **kwargs)
 	elif theExtension == 'bson':
 		return bson.load(fp, *args, **kwargs)
+	elif theExtension == 'bs':
+		return bserializer.load(fp, *args, **kwargs)
 	else:
 		raise Exception('No transcoder module for %s' % fp.name)
 
@@ -222,6 +231,37 @@ class msgpack(object):
 	def dumps(cls, obj, fp, *args, **kwargs):
 		try:
 			return msgpacklib.dumps(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+########################################################################
+
+class bserializer(object):
+	@classmethod
+	def load(cls, fp, *args, **kwargs):
+		try:
+			return bserializerlib.load(fp, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def loads(cls, s, *args, **kwargs):
+		try:
+			return bserializerlib.loads(s, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def dump(cls, obj, fp, *args, **kwargs):
+		try:
+			return bserializerlib.dump(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+	@classmethod
+	def dumps(cls, obj, fp, *args, **kwargs):
+		try:
+			return bserializerlib.dumps(obj, fp)
 		except Exception, e:
 			raise TranscoderDumpException(e)
 

@@ -2,11 +2,30 @@
 
 __all__ = ['load', 'transcoder', 'json', 'yaml', 'plist']
 
+import os
+
 import plistlib
 import json as jsonlib
-import yaml as yamllib
 
-import os
+########################################################################
+
+try:
+	import yaml as yamllib
+except:
+	pass
+
+try:
+	import bson as bsonlib
+except:
+	pass
+
+try:
+	import msgpack as msgpacklib
+except:
+	pass
+
+
+########################################################################
 
 class TranscoderLoadException(Exception):
 	pass
@@ -23,6 +42,10 @@ def transcoder(name):
 		return yaml
 	elif name == 'plist':
 		return plist
+	elif name == 'bson':
+		return bson
+	elif name == 'msgpack':
+		return msgpack
 	else:
 		return None
 
@@ -36,8 +59,8 @@ def load(fp, *args, **kwargs):
 		return yaml.load(fp, *args, **kwargs)
 	elif theExtension == 'plist':
 		return plist.load(fp, *args, **kwargs)
-	elif theExtension == 'pyon':
-		return pyon.load(fp, *args, **kwargs)
+	elif theExtension == 'bson':
+		return bson.load(fp, *args, **kwargs)
 	else:
 		raise Exception('No transcoder module for %s' % fp.name)
 
@@ -138,3 +161,68 @@ class plist(object):
 			return plistlib.writePlistToBytes(obj, fp)
 		except Exception, e:
 			raise TranscoderDumpException(e)
+
+########################################################################
+
+class bson(object):
+	@classmethod
+	def load(cls, fp, *args, **kwargs):
+		try:
+			return bsonlib.load(fp, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def loads(cls, s, *args, **kwargs):
+		try:
+			return bsonlib.loads(s, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def dump(cls, obj, fp, *args, **kwargs):
+		try:
+			s = bsonlib.dumps(obj)
+			fp.write(s)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+	@classmethod
+	def dumps(cls, obj, fp):
+		try:
+			return bsonlib.dumps(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+########################################################################
+
+class msgpack(object):
+	@classmethod
+	def load(cls, fp, *args, **kwargs):
+		try:
+			return msgpacklib.load(fp, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def loads(cls, s, *args, **kwargs):
+		try:
+			return msgpacklib.loads(s, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def dump(cls, obj, fp, *args, **kwargs):
+		try:
+			return msgpacklib.dump(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+	@classmethod
+	def dumps(cls, obj, fp, *args, **kwargs):
+		try:
+			return msgpacklib.dumps(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+########################################################################

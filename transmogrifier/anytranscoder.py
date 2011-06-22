@@ -6,6 +6,7 @@ import os
 
 import plistlib
 import json as jsonlib
+import pickle as picklelib
 
 ########################################################################
 
@@ -26,6 +27,16 @@ except:
 
 try:
 	import bserializer as bserializerlib
+except:
+	pass
+
+try:
+	import bencode as bencodelib
+except:
+	pass
+
+try:
+	import biplist as biplistlib
 except:
 	pass
 
@@ -53,6 +64,12 @@ def transcoder(name):
 		return msgpack
 	elif name == 'bs':
 		return bserializer
+	elif name == 'bencode':
+		return bencode
+	elif name == 'pickle':
+		return bencode
+	elif name == 'bplist':
+		return biplist
 	else:
 		return None
 
@@ -80,7 +97,26 @@ def load(fp, *args, **kwargs):
 
 ########################################################################
 
-class json(object):
+class transcoder_object(object):
+	@classmethod
+	def load(cls, fp, *args, **kwargs):
+		return cls.loads(fp.read())
+
+	@classmethod
+	def loads(cls, s, *args, **kwargs):
+		raise Exception('Unimplemented')
+
+	@classmethod
+	def dump(cls, obj, fp, *args, **kwargs):
+		return fp.write(cls.dumps(obj))
+
+	@classmethod
+	def dumps(cls, obj):
+		raise Exception('Unimplemented')
+
+########################################################################
+
+class json(transcoder_object):
 	@classmethod
 	def load(cls, fp, *args, **kwargs):
 		try:
@@ -103,7 +139,7 @@ class json(object):
 			raise TranscoderDumpException(e)
 
 	@classmethod
-	def dumps(cls, obj, fp):
+	def dumps(cls, obj):
 		try:
 			return jsonlib.dumps(obj, fp)
 		except Exception, e:
@@ -111,7 +147,7 @@ class json(object):
 
 ########################################################################
 
-class yaml(object):
+class yaml(transcoder_object):
 	@classmethod
 	def load(cls, fp, *args, **kwargs):
 		try:
@@ -142,7 +178,7 @@ class yaml(object):
 
 ########################################################################
 
-class plist(object):
+class plist(transcoder_object):
 	@classmethod
 	def load(cls, fp):
 		try:
@@ -173,7 +209,7 @@ class plist(object):
 
 ########################################################################
 
-class bson(object):
+class bson(transcoder_object):
 	@classmethod
 	def load(cls, fp, *args, **kwargs):
 		try:
@@ -197,7 +233,7 @@ class bson(object):
 			raise TranscoderDumpException(e)
 
 	@classmethod
-	def dumps(cls, obj, fp):
+	def dumps(cls, obj):
 		try:
 			return bsonlib.dumps(obj, fp)
 		except Exception, e:
@@ -205,7 +241,7 @@ class bson(object):
 
 ########################################################################
 
-class msgpack(object):
+class msgpack(transcoder_object):
 	@classmethod
 	def load(cls, fp, *args, **kwargs):
 		try:
@@ -228,7 +264,7 @@ class msgpack(object):
 			raise TranscoderDumpException(e)
 
 	@classmethod
-	def dumps(cls, obj, fp, *args, **kwargs):
+	def dumps(cls, obj, *args, **kwargs):
 		try:
 			return msgpacklib.dumps(obj, fp)
 		except Exception, e:
@@ -236,7 +272,7 @@ class msgpack(object):
 
 ########################################################################
 
-class bserializer(object):
+class bserializer(transcoder_object):
 	@classmethod
 	def load(cls, fp, *args, **kwargs):
 		try:
@@ -259,10 +295,73 @@ class bserializer(object):
 			raise TranscoderDumpException(e)
 
 	@classmethod
-	def dumps(cls, obj, fp, *args, **kwargs):
+	def dumps(cls, obj, *args, **kwargs):
 		try:
 			return bserializerlib.dumps(obj, fp)
 		except Exception, e:
 			raise TranscoderDumpException(e)
 
 ########################################################################
+
+class bencode(transcoder_object):
+	@classmethod
+	def loads(cls, s, *args, **kwargs):
+		try:
+			return bencodelib.bdecode(s, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def dumps(cls, obj, *args, **kwargs):
+		try:
+			return bencodelib.bencode(obj)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+########################################################################
+
+class pickle(transcoder_object):
+	@classmethod
+	def loads(cls, s, *args, **kwargs):
+		try:
+			return picklelib.loads(s, *args, **kwargs)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def dumps(cls, obj, *args, **kwargs):
+		try:
+			return picklelib.dumps(obj)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+########################################################################
+
+class biplist(transcoder_object):
+	@classmethod
+	def load(cls, fp):
+		try:
+			return biplistlib.readPlist(fp)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def loads(cls, s):
+		try:
+			return biplistlib.readPlistFromBytes(s)
+		except Exception, e:
+			raise TranscoderLoadException(e)
+
+	@classmethod
+	def dump(cls, obj, fp, indent = False):
+		try:
+			return biplistlib.writePlist(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)
+
+	@classmethod
+	def dumps(cls, obj, fp, indent = False):
+		try:
+			return biplistlib.writePlistToBytes(obj, fp)
+		except Exception, e:
+			raise TranscoderDumpException(e)

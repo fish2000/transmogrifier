@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
-import StringIO
+import StringIO as io
+#import io
 import struct
 import types
 import math
@@ -17,31 +18,36 @@ TYPE_SIGNED = 1 << 2
 
 # string, sequence, dictionary, integer, float, special | date, object, key, data
 
-TYPE_STRING =				1 << 4
+TYPE_DATA =					1 << 4
+TYPE_DATA_8  =				TYPE_DATA | SIZE_8
+TYPE_DATA_16 =				TYPE_DATA | SIZE_16
+TYPE_DATA_32 =				TYPE_DATA | SIZE_32
+
+TYPE_STRING =				2 << 4
 TYPE_STRING_8  =			TYPE_STRING | SIZE_8
 TYPE_STRING_16 =			TYPE_STRING | SIZE_16
 TYPE_STRING_32 =			TYPE_STRING | SIZE_32
 
-TYPE_SEQUENCE =				2 << 4
+TYPE_SEQUENCE =				3 << 4
 TYPE_SEQUENCE_8 =			TYPE_SEQUENCE | SIZE_8
 TYPE_SEQUENCE_16 =			TYPE_SEQUENCE | SIZE_16
 TYPE_SEQUENCE_32 =			TYPE_SEQUENCE | SIZE_32
 
-TYPE_DICTIONARY =			3 << 4
+TYPE_DICTIONARY =			4 << 4
 TYPE_DICTIONARY_8 =			TYPE_DICTIONARY | SIZE_8
 TYPE_DICTIONARY_16 =		TYPE_DICTIONARY | SIZE_16
 TYPE_DICTIONARY_32 =		TYPE_DICTIONARY | SIZE_32
 
-TYPE_INTEGER =				4 << 4
+TYPE_INTEGER =				5 << 4
 TYPE_INTEGER_8 =			TYPE_INTEGER | TYPE_SIGNED | SIZE_8
 TYPE_INTEGER_16 =			TYPE_INTEGER | TYPE_SIGNED | SIZE_16
 TYPE_INTEGER_32 =			TYPE_INTEGER | TYPE_SIGNED | SIZE_32
 
-TYPE_FLOAT =				5 << 4
+TYPE_FLOAT =				6 << 4
 TYPE_FLOAT_32 =				TYPE_FLOAT | SIZE_32
 TYPE_FLOAT_64 =				TYPE_FLOAT | SIZE_64
 
-TYPE_SPECIAL =				6 << 4
+TYPE_SPECIAL =				7 << 4
 TYPE_SPECIAL_NULL = 		TYPE_SPECIAL | 0 << 2
 TYPE_SPECIAL_BOOL = 		TYPE_SPECIAL | 1 << 2
 TYPE_SPECIAL_BOOL_FALSE =	TYPE_SPECIAL_BOOL | 0
@@ -54,7 +60,9 @@ class Serializer(object):
 		return self.serialize_object(s, o)
 
 	def serialize_object(self, s, o):
-		if type(o) in types.StringTypes:
+		if type(o) == bytes:
+			return self.serialize_data(s, o)
+		elif type(o) in types.StringTypes:
 			return self.serialize_string(s, o)
 		elif type(o) in [types.ListType, types.TupleType]:
 			return self.serialize_sequence(s, o)
@@ -68,6 +76,20 @@ class Serializer(object):
 			return self.serialize_bool(s, o)
 		else:
 			raise Exception('Unsupported type: %s' % (type(o)))
+
+	def serialize_data(self, s, o):
+		l = len(o)
+		if l <= 0xFF:
+			format = '!BB%ds' % l
+			d = struct.pack(format, TYPE_DATA_8, l, o)
+		elif l <= 0xFFFF:
+			format = '!BH%ds' % l
+			d = struct.pack(format, TYPE_DATA_16, l, o)
+		else:
+			format = '!BL%ds' % l
+			d = struct.pack(format, TYPE_DATA_32, l, o)
+		s.write(d)
+		return len(d)
 
 	def serialize_string(self, s, o):
 		o = o.encode('utf-8')
@@ -114,6 +136,7 @@ class Serializer(object):
 			d = struct.pack(format, TYPE_DICTIONARY_32, l)
 		s.write(d)
 		count = len(d)
+		# TODO sort by key
 		for k,v in o.items():
 			count += self.serialize_object(s, k)
 			count += self.serialize_object(s, v)
@@ -158,7 +181,9 @@ class Deserializer(object):
 		s.seek(-1, 1)
 
 		t = b & 0b11110000
-		if t == TYPE_STRING:
+		if t == TYPE_DATA:
+			return self.deserialize_data(s)
+		elif t == TYPE_STRING:
 			return self.deserialize_string(s)
 		elif t == TYPE_INTEGER:
 			return self.deserialize_integer(s)
@@ -170,17 +195,40 @@ class Deserializer(object):
 			return self.deserialize_dictionary(s)
 		elif t == TYPE_SPECIAL:
 			return self.deserialize_special(s)
-		else
+		else:
 			raise Exception('TODO')
+
+	def deserialize_data(self, s):
+# 		'''
+# 		>>> s = io.StringIO()
+# 		>>> Serializer().serialize(s, bytes('Hello world'))
+# 		13
+# 		>>> s.seek(0)
+# 		>>> s = Deserializer().deserialize(s)
+# 		>>> type(s)
+# 		<type 'bytes'>
+# 		>>> s
+# 		'Hello world'
+# 		'''
+		b, = struct.unpack('!B', s.read(1))
+		size = b & 0b00000011
+		format, size = [('!B',1), ('!H',2), ('!I',4), ('Q',8)][size]
+		count, = struct.unpack(format, s.read(size))
+		theData = bytes(s.read(count))
+		return theData
+
 
 	def deserialize_string(self, s):
 		'''
-		>>> s = StringIO.StringIO()
+		>>> s = io.StringIO()
 		>>> Serializer().serialize(s, 'Hello world')
 		13
 		>>> s.seek(0)
-		>>> print Deserializer().deserialize(s)
-		Hello world
+		>>> s = Deserializer().deserialize(s)
+		>>> type(s)
+		<type 'str'>
+		>>> s
+		'Hello world'
 		'''
 		b, = struct.unpack('!B', s.read(1))
 		size = b & 0b00000011
@@ -191,7 +239,7 @@ class Deserializer(object):
 
 	def deserialize_integer(self, s):
 		'''
-		>>> s = StringIO.StringIO()
+		>>> s = io.StringIO()
 		>>> Serializer().serialize(s, 42)
 		2
 		>>> s.seek(0)
@@ -206,7 +254,7 @@ class Deserializer(object):
 
 	def deserialize_float(self, s):
 		'''
-		>>> s = StringIO.StringIO()
+		>>> s = io.StringIO()
 		>>> Serializer().serialize(s, 3.14)
 		5
 		>>> s.seek(0)
@@ -222,7 +270,7 @@ class Deserializer(object):
 
 	def deserialize_sequence(self, s):
 		'''
-		>>> s = StringIO.StringIO()
+		>>> s = io.StringIO()
 		>>> Serializer().serialize(s, [])
 		2
 		>>> s.seek(0)
@@ -240,7 +288,7 @@ class Deserializer(object):
 
 	def deserialize_dictionary(self, s):
 		'''
-		>>> s = StringIO.StringIO()
+		>>> s = io.StringIO()
 		>>> Serializer().serialize(s, {'key':'value'})
 		14
 		>>> s.seek(0)
@@ -260,7 +308,7 @@ class Deserializer(object):
 
 	def deserialize_special(self, s):
 		'''
-		>>> s = StringIO.StringIO()
+		>>> s = io.StringIO()
 		>>> Serializer().serialize(s, True)
 		1
 		>>> s.seek(0)
@@ -277,8 +325,6 @@ class Deserializer(object):
 		else:
 			raise Exception('TODO')
 
-
-
 ########################################################################
 
 def dump(o, s):
@@ -288,15 +334,15 @@ def dump(o, s):
 
 if __name__ == '__main__':
  	o = {'key':'value'}
- 	s = StringIO.StringIO()
+ 	s = io.StringIO()
  	c = Serializer().serialize(s, o)
- 	print c
+ 	print(c)
  	d = s.getvalue()
- 	print d
- 	print len(d)
+ 	print(d)
+ 	print(len(d))
 
- 	o = Deserializer().deserialize(StringIO.StringIO(d))
- 	print o
+ 	o = Deserializer().deserialize(io.StringIO(d))
+ 	print(o)
 
 
 if __name__ == "__main__":

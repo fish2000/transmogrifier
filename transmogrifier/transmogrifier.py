@@ -53,11 +53,11 @@ class Transmogrifier(object):
 			argparser = argparse.ArgumentParser()
 			argparser.add_argument('-i', '--input', action='store', dest='input', type=argparse.FileType(), default = None, metavar='INPUT',
 				help='The input file (type is inferred by file extension).')
-			argparser.add_argument('--input-type', action='store', dest='input_type', type=str, metavar='INPUT_TYPE',
+			argparser.add_argument('-n', '--input-type', action='store', dest='input_type', type=str, metavar='INPUT_TYPE',
 				help='The input file type (overides file extension if any).')
 			argparser.add_argument('-o', '--output', action='store', dest='output', type=argparse.FileType('w'), default = None, metavar='OUTPUT',
 				help='Output directory for generated files.')
-			argparser.add_argument('--output-type', action='store', dest='output_type', type=str, metavar='INPUT_TYPE',
+			argparser.add_argument('-t', '--output-type', action='store', dest='output_type', type=str, metavar='INPUT_TYPE',
 				help='The output file type (overides file extension if any).')
 			argparser.add_argument('--pretty', action='store_const', const=True, default=False, metavar='PRETTY',
 				help='Prettify the output (where possible).')
